@@ -142,7 +142,7 @@
 					GLOBAL_GAME_PATH = gamePathTF.text;
 					GLOBAL_PACK_PATH = packPathTF.text;
 					if(gamePathTF.text != "") {
-						var file = new File(gamePathTF.text);
+						var file:File = new File(gamePathTF.text);
 						var array:Array = file.getDirectoryListing();
 						var ccsExist:Boolean = false;
 						for each(var f:File in array) {
@@ -185,7 +185,7 @@
 					
 					
 					gamePathTF.onTextChange = function():void{
-						var file = new File(gamePathTF.text);
+						var file:File = new File(gamePathTF.text);
 						var array:Array = file.getDirectoryListing();
 						var ccsExist:Boolean = false;
 						for each(var f:File in array) {
@@ -402,8 +402,8 @@
 				else if(type==PACK_SYNC || type==PACK_ALL){
 					build();
 //					onSync_bitmap_font();
-//					onSync_uiconfig();
-//					onSync_plist();
+					onSync_uiconfig();
+					onSync_plist();
 				}else if(type==PACK_SYNC_UICONFIG){
 					build();
 					onSync_bitmap_font();
@@ -427,16 +427,17 @@
 					var fileList:Array = FileManager.getFiles(new File(cocostudio_path.text+"/"+moduleName+"/Result/"),".lua");
 					fileNames = fileNames.concat(fileList);
 					for each(var f:File in fileList){
-						if (fileNames.length > 1){//如果是多画布的情况下
-							var luaContent:String = FileManager.getFileString(f);
-							var flag:String = f.name.replace("Config.lua","");
-							var reg:RegExp = new RegExp('\{\["path"\]= "'+moduleName+'/',"gi");
-							while(luaContent.indexOf('{["path"]= "'+moduleName+'/')!=-1){
-								luaContent = luaContent.replace('{["path"]= "'+moduleName+'/','{["path"] = "'+moduleName+"/"+flag+"/");
-							}
-							FileManager.writeTextInFile(f,luaContent);
-						}
-						FileManager.copyFile(f.nativePath,script_path.text+"//"+moduleName+"//uiConfig//"+f.name,true);
+//						if (fileNames.length > 1){//如果是多画布的情况下
+//							var luaContent:String = FileManager.getFileString(f);
+//							var flag:String = f.name.replace("Config.lua","");
+//							var reg:RegExp = new RegExp('\{\["path"\]= "'+moduleName+'/',"gi");
+//							while(luaContent.indexOf('{["path"]= "'+moduleName+'/')!=-1){
+//								luaContent = luaContent.replace('{["path"]= "'+moduleName+'/','{["path"] = "'+moduleName+"/"+flag+"/");
+//							}
+//							FileManager.writeTextInFile(f,luaContent);
+//						}
+						
+						FileManager.copyFile(f.nativePath,res_path.text+"//"+moduleName+"//uiResource//"+moduleName + "_" +f.name,true);
 					}
 					Alert.show("打包并同步uiconfig成功","提示");
 				}
@@ -475,12 +476,12 @@
 							FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".pvr.ccz",true);
 							if(checkNotPlistFile()==false){
 								if(checkPlistExists() == true){
-									if (fileNames.length <= 1){
-										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
-										Alert.show("打包并同步资源成功","提示");
-										clearInterval(intervarId);
-										return;
-									}
+//									if (fileNames.length <= 1){
+//										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
+//										Alert.show("打包并同步资源成功","提示");
+//										clearInterval(intervarId);
+//										return;
+//									}
 									for(var k:int = 0;k < fileNames.length;k++){
 										var plistPath:String = cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist";
 										var plistFile:File = new File(plistPath);

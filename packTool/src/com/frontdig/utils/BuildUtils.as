@@ -72,10 +72,11 @@ package com.frontdig.utils
 		
 		private static function encodeModuleResource(exe:File,resource:File,result:File,name:String,bHighQuality:Boolean=false):void
 		{
-//			var resultResource:File = new File(result.nativePath + "/resultResource");
-//			resultResource.createDirectory();
-//			copyResource(resource,resultResource);
-			var resultResource:File = result;
+			var dstSource:File = new File(result.nativePath + File.separator + "resultResource" + File.separator + resource.parent.name);
+			dstSource.createDirectory();
+			copyResource(resource,dstSource);
+//			var resultResource:File = result;
+			var resultResource:File = new File(result.nativePath + File.separator + "resultResource");
 			var progress:Array = buildNativeProgress(exe,0);
 			var resultItem:File = new File(result.nativePath + "/" + name + ".plist");
 			var resultPVRCCZItem:File = new File(result.nativePath + "/" + name + ".pvr.ccz");
@@ -109,6 +110,13 @@ package com.frontdig.utils
 			{
 				progress[2].push("RGBA8888");
 			}
+			var string:String = "";
+			string += exe.nativePath+" ";
+			for each(var str:String in progress[2]) {
+				string += str + " "
+			}
+			trace(string);
+			
 			progress[2].push(resultResource.nativePath);
 			progress[1].arguments = progress[2];
 			progress[0].start(progress[1]);
