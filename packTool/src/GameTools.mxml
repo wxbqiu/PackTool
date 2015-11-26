@@ -406,11 +406,11 @@
 					onSync_plist();
 				}else if(type==PACK_SYNC_UICONFIG){
 					build();
-					onSync_bitmap_font();
+//					onSync_bitmap_font();
 					onSync_uiconfig();
 				}else if(type == PACK_SYNC_PLIST){
 					build();
-					onSync_bitmap_font();
+//					onSync_bitmap_font();
 					onSync_plist();
 				}else if(type == FIND_NOT_USE){
 					BuildUtils.findNotUse(new File(cocostudio_path.text+"/"+moduleNameInput.text),moduleNameInput.text);
