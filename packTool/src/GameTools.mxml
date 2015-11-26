@@ -237,6 +237,17 @@
 					{label:"查找未使用文件"},
 					{label:"与base对比重复资源文件"}
 				];
+//				buildBtn.dataProvider = 
+//					[
+//						{label:"打包模块"},
+//						{label:"打包&同步"},
+//						{label:"打包&同步uiconfig"},
+//						{label:"打包&同步plist"},
+//						{label:"清理模块"},
+//						{label:"删除模块"},
+//						{label:"查找未使用文件"},
+//						{label:"与base对比重复资源文件"}
+//					];
 			}
 			public const PACK_ALL:int = 0;
 			public const PACK_SYNC:int = 1;
@@ -413,10 +424,10 @@
 //					onSync_bitmap_font();
 					onSync_plist();
 				}else if(type == FIND_NOT_USE){
-					BuildUtils.findNotUse(new File(cocostudio_path.text+"/"+moduleNameInput.text),moduleNameInput.text);
+//					BuildUtils.findNotUse(new File(cocostudio_path.text+"/"+moduleNameInput.text),moduleNameInput.text);
 					
 				}else if(type == FIND_DIFF_WITH_BASE){
-					DiffUtils.diffWithBase(new File(cocostudio_path.text+"/"+moduleName+"/Resources/"+moduleName),new File(cocostudio_path.text+"/"+moduleName+"/Resources/base"));
+//					DiffUtils.diffWithBase(new File(cocostudio_path.text+"/"+moduleName+"/Resources/"+moduleName),new File(cocostudio_path.text+"/"+moduleName+"/Resources/base"));
 				}
 				
 				function build():void{
@@ -467,7 +478,8 @@
 				}
 				
 				function onSync_plist():void{
-
+					var fileList:Array = FileManager.getFiles(new File(cocostudio_path.text+"/"+moduleName+"/Result/"),".lua");
+					fileNames = fileNames.concat(fileList);
 					//复制plist和pvr.ccz
 					intervarId = setInterval(function():void{
 						var file:File = new File(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz");
@@ -488,12 +500,12 @@
 										var plistContent:String = FileManager.getFileString(plistFile);
 										var orginContent:String = plistContent+"";
 										var flag:String = fileNames[k].name.replace("Config.lua","");
-										var reg:RegExp = new RegExp("<key>"+moduleName,"gi");
-										plistContent = plistContent.replace(reg,"<key>"+moduleName+"/"+flag);
+//										var reg:RegExp = new RegExp("<key>"+moduleName,"gi");
+//										plistContent = plistContent.replace(reg,"<key>"+moduleName+"/"+flag);
 //										trace(plistContent);
-										FileManager.writeTextInFile(plistFile,plistContent);
+//										FileManager.writeTextInFile(plistFile,plistContent);
 										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+"_"+flag+".plist",true);
-										FileManager.writeTextInFile(plistFile,orginContent);
+//										FileManager.writeTextInFile(plistFile,orginContent);
 										Alert.show("打包并同步资源成功","提示");
 										clearInterval(intervarId);
 									}
