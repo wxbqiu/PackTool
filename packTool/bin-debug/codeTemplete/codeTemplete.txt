@@ -1,0 +1,54 @@
+--模块名			{moduleName}
+--类名			{MediatorClass}
+--plsit地址		{plist}
+--mediator常量	{MediatorConstant}
+--ui配置文件		{uiConfig}
+--注册常量		{ModuleCommand}
+--执行回调		{handler}
+
+-------------------CommandHandler-------------------------
+require "src/module/view/{moduleName}/{MediatorClass}"
+function {handler}(name,body)
+    AssetLoader:getInstance():add("{plist}",function()
+        local mdt =  MediatorManager:getMediator({MediatorConstant});
+        mdt = mdt or {MediatorClass}.new();
+        MediatorManager:register({MediatorConstant},mdt,MediatorConstant.WINDOW_LAYER_MEDIATOR);
+    end);
+end
+
+-------------------Class-------------------------
+{MediatorClass} = class("{MediatorClass}",PanelMediator);
+
+function {MediatorClass}:ctor(options)
+    self.super.ctor(self,options);
+end
+
+
+function {MediatorClass}:init()
+    local _,uiTag = self:initWithConfig("{uiConfig}");
+end
+
+function {MediatorClass}:listTextureCaches()
+    return 
+    {
+        "{plist}",
+    };
+end
+
+
+function {MediatorClass}:listNotificationInterests()
+    return nil;
+end
+
+function {MediatorClass}:handleNotification(name,body)
+
+end
+
+function {MediatorClass}:handleClickListener(node,px,py)
+    local nodeTag = node:getTag();
+end
+
+-------------------Other-------------------------
+Commander:register({ModuleCommand},{handler}); 
+{ModuleCommand} = ;
+{MediatorConstant} = ;

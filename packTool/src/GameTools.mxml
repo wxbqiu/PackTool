@@ -1,0 +1,811 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:ns1="*"
+					   width="756" height="533" applicationComplete="appInt(event)">
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" paddingTop="15"/>
+	</s:layout>
+	<fx:Style source="GameTools.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.frontdig.manager.FileManager;
+			import com.frontdig.utils.BuildUtils;
+			import com.frontdig.utils.ChinaUtil;
+			import com.frontdig.utils.CodeTempUtil;
+			import com.frontdig.utils.Cookie;
+			import com.frontdig.utils.DiffUtils;
+			import com.frontdig.utils.EffectUtils;
+			import com.frontdig.utils.ExcelUtils;
+			import com.frontdig.utils.SocketUtils;
+			
+			import flash.utils.clearInterval;
+			import flash.utils.setInterval;
+			import flash.utils.setTimeout;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.MenuEvent;
+			
+			import spark.events.TextOperationEvent;
+			private const TAB_MODULE:int = 0;
+			private const TAB_PACK_RES:int = 1;
+			private const TAB_SET_PATH:int = 3;
+			
+			public static var GLOBAL_PACK_PATH:String;
+			public static var GLOBAL_GAME_PATH:String;
+			public static var COCOSSTUDIO_PROJ_PATH:String;
+			
+			public static var openFileCookie:Cookie = new Cookie("openFile",24*365);
+			
+			public static var SECRET_KEY:String = "2d9205f4fb747f174194fee69584d141";//打包密钥,8个为一组
+			protected function createPrjBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				switchPrjContainMainState(true);
+				moduleNameInput.text= "";
+				script_path.text = GLOBAL_GAME_PATH+"/src/module/view";
+				res_path.text = GLOBAL_GAME_PATH+"/res/module";
+				cocostudio_path.text = GLOBAL_GAME_PATH+"/cocosstudio";
+//				if(moduleNameInput.text!=""){
+//					moduleNameInput_changeHandler(null);
+//				}
+			}
+			
+			protected function moduleNameInput_changeHandler(event:TextOperationEvent):void
+			{
+				// TODO Auto-generated method stub
+//				script_path.text = gamePathTF.text+"/resource/luascript/module/"+moduleNameInput.text+"/uiConfig";
+//				res_path.text = gamePathTF.text+"/resource/res/module/"+moduleNameInput.text+"/uiResource";
+//				cocostudio_path.text = gamePathTF.text+"/cocoStudio/"+ moduleNameInput.text;
+				
+			}
+			protected function openPrjBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+//				FileManager.open(function(evt:Event):void{
+//					var openFile:File = evt.target as File;
+//					openXMLTools(openFile);
+//				},false,[new FileFilter("ui配置文件","*xml.tool")]);
+				
+				FileManager.open(function(evt:Event):void{
+					var openFile:File = evt.target as File;
+					openXMLTools(openFile);
+				},true);
+			}
+			
+			public function openXMLTools(openFile:File):void{
+//				var openFileText:String = FileManager.getFileString(openFile).replace(/\{prjPath\}/gi,GLOBAL_GAME_PATH);
+//				var openFileXml:XML = new XML(openFileText);
+//				var moduleName:String = openFileXml.Name;
+//				var cocostudioFolderPath:String = openFileXml.CocostudioFolder;
+//				var ResourceFolderPath:String = openFileXml.ResourceFolder;
+//				var LuascriptFolderPath:String = openFileXml.LuascriptFolder;
+//				
+//				moduleNameInput.text = moduleName;
+//				cocostudio_path.text = cocostudioFolderPath;
+//				res_path.text = ResourceFolderPath;
+//				script_path.text = LuascriptFolderPath;
+//				switchPrjContainMainState(false);
+//				
+//				openFileCookie.put("openFileName",openFile.nativePath);
+				
+				var openFileDir:String = openFile.nativePath;
+				var moduleName:String = openFileDir.substring(openFileDir.lastIndexOf(File.separator) + 1);
+				moduleNameInput.text = moduleName;
+				
+				cocostudio_path.text = GLOBAL_GAME_PATH+ File.separator + "cocosstudio";
+				script_path.text = GLOBAL_GAME_PATH+ File.separator + "src" + File.separator + "module"+ File.separator + "view";
+				res_path.text = GLOBAL_GAME_PATH+File.separator+"res"+File.separator+"module";
+
+				
+				switchPrjContainMainState(false);
+				openFileCookie.put("openFileName",openFile.nativePath);
+			}
+			
+			public function switchPrjContainMainState(isCreateState:Boolean):void{
+				createPrjContainer.visible = true;
+				createPrjBtn.visible = openPrjBtn.visible = false;
+				createBtn.visible = isCreateState;
+				buildBtn.visible = !isCreateState;
+				if(isCreateState){
+					moduleNameInput.enabled = script_path.enabled = res_path.enabled = cocostudio_path.enabled = true;
+				}else{
+					moduleNameInput.enabled = script_path.enabled = res_path.enabled = cocostudio_path.enabled = false;
+				}
+			}
+			
+			protected function backBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				createPrjContainer.visible = false;
+				createPrjBtn.visible = openPrjBtn.visible = true;
+			}
+			
+			protected function appInt(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				initCreatePrjContainer();
+				initMainTab();
+			}
+			
+			private function initMainTab():void{
+				mainTab.selectedIndex = TAB_SET_PATH;//强制初始化
+//				buildMenuBtn.da =[
+//					{"label":"新建文件夹"},{"label":"新建文件"},{"label":"新建公文包"}
+//				];
+				setTimeout(function():void{
+					GLOBAL_GAME_PATH = gamePathTF.text;
+					GLOBAL_PACK_PATH = packPathTF.text;
+					if(gamePathTF.text != "") {
+						var file = new File(gamePathTF.text);
+						var array:Array = file.getDirectoryListing();
+						var ccsExist:Boolean = false;
+						for each(var f:File in array) {
+							if(!f.isDirectory) {
+								trace(f.name)
+								var fileName:String = f.name;
+								if(fileName.indexOf(".")!=0) {
+									var index:int = fileName.lastIndexOf(".")
+									var suffix:String = fileName.substring(index);
+									if(suffix == ".ccs") {
+										COCOSSTUDIO_PROJ_PATH = f.nativePath;
+										ccsExist = true;
+										break;
+									}
+								}
+							}
+						}
+						if(ccsExist) {
+							GLOBAL_GAME_PATH = gamePathTF.text;
+						} else {
+							gamePathTF.text = ""
+							Alert.show("请在全局路径设置工程路径", "找不到CocosStudio工程")
+						}
+					}
+					
+					if(checkisSetGlobalPathConfig() == true){
+						mainTab.selectedIndex = TAB_MODULE;
+						if(openFileCookie.get("openFileName")!=null && openFileCookie.get("openFileName")!=""){
+							var prjFile:File = new File(openFileCookie.get("openFileName"));
+							if(prjFile.exists == false){
+								openFileCookie.put("openFileName", "");
+								Alert.show("文件不存在", "警告");
+								return;
+							}
+							openXMLTools(prjFile);
+						}
+					}else{
+						mainTab.selectedIndex = TAB_SET_PATH;
+					}
+					
+					
+					gamePathTF.onTextChange = function():void{
+						var file = new File(gamePathTF.text);
+						var array:Array = file.getDirectoryListing();
+						var ccsExist:Boolean = false;
+						for each(var f:File in array) {
+							if(!f.isDirectory) {
+								trace(f.name)
+								var fileName:String = f.name;
+								if(fileName.indexOf(".")!=0) {
+									var index:int = fileName.lastIndexOf(".")
+									var suffix:String = fileName.substring(index);
+									if(suffix == ".ccs") {
+										COCOSSTUDIO_PROJ_PATH = f.nativePath;
+										ccsExist = true;
+										break;
+									}
+								}
+							}
+						}
+						if(ccsExist) {
+							GLOBAL_GAME_PATH = gamePathTF.text;
+						} else {
+							gamePathTF.text = ""
+							Alert.show("你在逗我吗？目录下面没有CocosStudio的工程", "找不到CocosStudio工程")
+						}
+					}
+					
+					packPathTF.onTextChange = function():void{
+						GLOBAL_PACK_PATH = packPathTF.text;
+					}
+					
+					
+				},100);
+				mainTab.addEventListener(Event.CHANGE,function(evt:Event):void{
+					if(mainTab.selectedIndex != TAB_SET_PATH){
+						if(checkisSetGlobalPathConfig() == false){
+							Alert.show("请先设置全局路径","提示");
+							mainTab.selectedIndex = TAB_SET_PATH;
+						}
+					}
+				});
+				
+				buildBtn.dataProvider = 
+				[
+					{label:"打包模块"},
+					{label:"打包&同步"},
+					{label:"打包&同步uiconfig"},
+					{label:"打包&同步plist"},
+					{label:"清理模块"},
+					{label:"删除模块"},
+					{label:"查找未使用文件"},
+					{label:"与base对比重复资源文件"}
+				];
+			}
+			public const PACK_ALL:int = 0;
+			public const PACK_SYNC:int = 1;
+			public const PACK_SYNC_UICONFIG:int = 2;
+			public const PACK_SYNC_PLIST:int = 3;
+			public const CLEAR_MODULE:int = 4;
+			public const DEL_MODULE:int = 5;
+			public const FIND_NOT_USE:int = 6;
+			public const FIND_DIFF_WITH_BASE:int = 7;
+			public var build_type:int = 0;
+			private function initCreatePrjContainer():void{
+				createPrjContainer.visible = false;
+				
+			}
+			
+			
+			private function checkisSetGlobalPathConfig():Boolean
+			{
+//				return false;
+				return GLOBAL_GAME_PATH != "" && GLOBAL_PACK_PATH != "";
+			}
+			
+
+			
+			
+			protected function createModuhe_Handler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(moduleNameInput.text==""){
+					Alert.show("模块名不能为空","提示");
+					return;
+				}
+				Alert.okLabel = "确定";
+				Alert.cancelLabel = "取消";
+				Alert.show("不推荐这种创建模块的方式，是否仍然创建新的模块？","提示",Alert.OK|Alert.CANCEL,null,function(closeEvent:CloseEvent):void{
+					if(closeEvent.detail == Alert.OK){
+						if(createModule()){
+							Alert.show("项目创建成功","提示");
+						}else{
+//							Alert.show("创建项目失败","错误");
+						}
+					}
+				});
+				
+			}
+			
+			private function createModule():Boolean{
+				var moduleName:String = moduleNameInput.text;
+				try{
+					//检测模块是否同名
+					if(new File(cocostudio_path.text+"/"+moduleName).exists == true){
+						Alert.show(moduleName+"已存在","提示");
+						return false;
+					}
+				
+					//创建模块文件夹
+					var targetFile:File = new File(cocostudio_path.text+"/"+moduleName);
+					targetFile.createDirectory();
+					
+					//写入项目
+					var openFileText:String = FileManager.getFileString(new File(COCOSSTUDIO_PROJ_PATH));
+					var openFileXml:XML = new XML(openFileText);
+					var xmlString:String = "<Folder Name=\"" + moduleName + "\"/>"
+					var newNode:XML = new XML(xmlString);          
+					openFileXml.SolutionFolder[0].Group[0].RootFolder[0].appendChild(newNode);
+					trace(openFileXml)
+					var saveFile:File = new File();
+					var saveFileStream:FileStream = new FileStream();
+					saveFile.nativePath = COCOSSTUDIO_PROJ_PATH;
+					saveFileStream.open(saveFile, FileMode.WRITE);
+					saveFileStream.writeUTFBytes(openFileXml.toString());
+					saveFileStream.close();
+					//创建cocostudio项目文件
+					//拷贝模板文件夹
+//					FileManager.getOrMoveFile(
+//						File.applicationDirectory.nativePath+"/"+"TempleteFile/TempleteModule",
+//						new File(cocostudio_path.text+"/"+moduleName)
+//					)
+
+					
+//					var orginFile:File = new File(File.applicationDirectory.nativePath+"/"+"TempleteFile/TempleteModule");
+//					var targetFile:File = new File(cocostudio_path.text+"/"+moduleName);
+//					orginFile.copyTo(targetFile);
+//					//在模块的Resource里面建立一个文件夹用于存放模块自己的资源文件
+//					var moduleFolderInResourceDic:File = new File(targetFile.nativePath+"/Resources/"+moduleName);
+//					moduleFolderInResourceDic.createDirectory();
+//					
+//					//复制公用的资源进来
+//					var baseFolder:String = GLOBAL_GAME_PATH+"/cocoStudio/base/base";
+//					FileManager.copyFile(baseFolder,targetFile.nativePath+"/Resources/base");
+//					
+//					//修改json名字
+//					var orginJson:File = new File(targetFile.nativePath+"/Json/TempleteModule_1.json");
+//					FileManager.copyFile(orginJson.nativePath,targetFile.nativePath+"/Json/"+moduleName+".json");
+//					orginJson.deleteFile();
+//					
+//					//修改.xml.ui文件
+//					var xmlFile:File = new File(targetFile.nativePath+"/TempleteModule.xml.ui");
+//					var xmlText:String = FileManager.getFileString(xmlFile);
+//					var repText:String = xmlText.replace(/\{tempModule\}/gi,moduleName);
+//					
+//					FileManager.writeTextInFile(new File(targetFile.nativePath+"/"+moduleName+".xml.ui"),repText);
+//					xmlFile.deleteFile();
+					
+//					//生成打包工具使用的格式文件
+//					var toolFile:File = new File(targetFile.nativePath+"/TempleteModule.xml.tool");
+//					var toolText:String = FileManager.getFileString(toolFile);
+//					
+//					var repToolText:String = toolText.replace("{name}",moduleName);
+//					repToolText = repToolText.replace("{CocostudioFolder}",(cocostudio_path.text).replace(GLOBAL_GAME_PATH,"{prjPath}"));
+//					repToolText = repToolText.replace("{ResourceFolder}",(res_path.text).replace(GLOBAL_GAME_PATH,"{prjPath}"));
+//					repToolText = repToolText.replace("{LuascriptFolder}",(script_path.text).replace(GLOBAL_GAME_PATH,"{prjPath}"));
+//					
+//					FileManager.writeTextInFile(new File(targetFile.nativePath+"/"+moduleName+".xml.tool"),repToolText);
+//					toolFile.deleteFile();
+//					
+//					//创建luascript模块文件
+//					var luascriptFile:File = new File(script_path.text+"/"+moduleName+"/uiConfig");
+//					luascriptFile.createDirectory();
+//					//创建resource模块文件
+//					var resFile:File = new File(res_path.text+"/"+moduleName+"/uiResource");
+//					resFile.createDirectory();
+//					
+					openXMLTools(targetFile);
+					
+				}catch(err:Error){
+					Alert.show("创建项目失败，错误内容：\n"+err.message,"错误");
+					return false;
+				}finally{
+					
+				}
+				
+				return true;
+			}
+			
+			private function startBuild(type:int):void
+			{
+				var moduleName:String = moduleNameInput.text;
+				
+				var intervarId:int = 0;
+				var fileNames:Array = [];
+				if(type==CLEAR_MODULE){
+					Alert.okLabel = "确定";
+					Alert.cancelLabel = "取消";
+					Alert.show("是否清理模块，这将会删除掉backup，result，是否继续？","提示",Alert.OK|Alert.CANCEL,null,function(closeEvent:CloseEvent):void{
+						if(closeEvent.detail == Alert.OK){
+							var backup:File = new File(cocostudio_path.text+"/"+moduleName+"/Backup");
+							var resul:File = new File(cocostudio_path.text+"/"+moduleName+"/Result");
+//							var base:File = new File(cocostudio_path.text+"/"+moduleName+"/Resources/base");
+							if(backup.exists && backup.isDirectory){
+								backup.deleteDirectory(true);
+							}
+							if(resul.exists && resul.isDirectory){
+								resul.deleteDirectory(true);
+							}
+//							if(base.exists && base.isDirectory){
+//								base.deleteDirectory(true);
+//							}
+							Alert.show("清理成功","提示");
+						}
+					});
+				}
+				else if(type==PACK_SYNC || type==PACK_ALL){
+					build();
+//					onSync_bitmap_font();
+//					onSync_uiconfig();
+//					onSync_plist();
+				}else if(type==PACK_SYNC_UICONFIG){
+					build();
+					onSync_bitmap_font();
+					onSync_uiconfig();
+				}else if(type == PACK_SYNC_PLIST){
+					build();
+					onSync_bitmap_font();
+					onSync_plist();
+				}else if(type == FIND_NOT_USE){
+					BuildUtils.findNotUse(new File(cocostudio_path.text+"/"+moduleNameInput.text),moduleNameInput.text);
+					
+				}else if(type == FIND_DIFF_WITH_BASE){
+					DiffUtils.diffWithBase(new File(cocostudio_path.text+"/"+moduleName+"/Resources/"+moduleName),new File(cocostudio_path.text+"/"+moduleName+"/Resources/base"));
+				}
+				
+				function build():void{
+					BuildUtils.buildModule(new File(cocostudio_path.text+"/"+moduleNameInput.text),moduleNameInput.text,hightQuiltyCb.selected);
+				}
+				
+				function onSync_uiconfig():void{
+					var fileList:Array = FileManager.getFiles(new File(cocostudio_path.text+"/"+moduleName+"/Result/"),".lua");
+					fileNames = fileNames.concat(fileList);
+					for each(var f:File in fileList){
+						if (fileNames.length > 1){//如果是多画布的情况下
+							var luaContent:String = FileManager.getFileString(f);
+							var flag:String = f.name.replace("Config.lua","");
+							var reg:RegExp = new RegExp('\{\["path"\]= "'+moduleName+'/',"gi");
+							while(luaContent.indexOf('{["path"]= "'+moduleName+'/')!=-1){
+								luaContent = luaContent.replace('{["path"]= "'+moduleName+'/','{["path"] = "'+moduleName+"/"+flag+"/");
+							}
+							FileManager.writeTextInFile(f,luaContent);
+						}
+						FileManager.copyFile(f.nativePath,script_path.text+"//"+moduleName+"//uiConfig//"+f.name,true);
+					}
+					Alert.show("打包并同步uiconfig成功","提示");
+				}
+				function checkNotPlistFile():Boolean{
+					var checkFile:File = new File(cocostudio_path.text+"/"+moduleName+"/Result/resultResource");
+					var isNotPlistFile:Boolean = true;
+					if(checkFile.exists){
+						isNotPlistFile = FileManager.getFiles(checkFile,".png").length <=0 && FileManager.getFiles(checkFile,".jpg").length <=0;
+					}
+					return isNotPlistFile;
+				}
+				function checkPlistExists():Boolean
+				{
+					return (new File(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist")).exists;
+				}
+				
+				function onSync_bitmap_font():void{
+					var resPath:String = new File(res_path.text).parent.nativePath;
+					var bitmap_font:File = new File(cocostudio_path.text+"/"+moduleName+"/Resources/bitmap_font/"+moduleName);
+					if(bitmap_font.exists){
+						FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Resources/bitmap_font/"+moduleName,resPath+"/bitmap_font/"+moduleName,true);
+					}else{
+						Alert.show("程序自动生成了bitmap_font文件夹,\n用于存放图片字体序列,\n记得提交哇,骚年","提示");
+						bitmap_font.createDirectory();
+						onSync_bitmap_font();
+					}
+				}
+				
+				function onSync_plist():void{
+
+					//复制plist和pvr.ccz
+					intervarId = setInterval(function():void{
+						var file:File = new File(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz");
+						if(file.exists){
+							//							trace("打包完成");
+							FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".pvr.ccz",true);
+							if(checkNotPlistFile()==false){
+								if(checkPlistExists() == true){
+									if (fileNames.length <= 1){
+										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
+										Alert.show("打包并同步资源成功","提示");
+										clearInterval(intervarId);
+										return;
+									}
+									for(var k:int = 0;k < fileNames.length;k++){
+										var plistPath:String = cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist";
+										var plistFile:File = new File(plistPath);
+										var plistContent:String = FileManager.getFileString(plistFile);
+										var orginContent:String = plistContent+"";
+										var flag:String = fileNames[k].name.replace("Config.lua","");
+										var reg:RegExp = new RegExp("<key>"+moduleName,"gi");
+										plistContent = plistContent.replace(reg,"<key>"+moduleName+"/"+flag);
+//										trace(plistContent);
+										FileManager.writeTextInFile(plistFile,plistContent);
+										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+"_"+flag+".plist",true);
+										FileManager.writeTextInFile(plistFile,orginContent);
+										Alert.show("打包并同步资源成功","提示");
+										clearInterval(intervarId);
+									}
+								}else{
+									return;
+								}
+							}
+//							Alert.show("打包并同步资源成功","提示");
+							clearInterval(intervarId);
+							
+						}
+					},200);
+				}
+			}
+
+			
+			protected function clearBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			public static var logTF_UI:TextArea;
+			protected function normalPackBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				GameTools.logTF_UI = logTF;
+				BuildUtils.build(new File(orginResPathTF.text),new File(saveResPathTF.text),false);
+			}
+			
+			protected function hightPackBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				GameTools.logTF_UI = logTF;
+				BuildUtils.build(new File(orginResPathTF.text),new File(saveResPathTF.text),true);
+			}
+			
+			protected function decodaBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var decodaXML_head:String = '<?xml version="1.0" encoding="utf-8"?>\n<project>\n';
+				var decodaXML_footer:String = '\n</project>';
+				var decodaXML_content:Array = [];
+				var fileList:Array = FileManager.getFiles(new File(GLOBAL_GAME_PATH+"/resource/luascript"),".lua");
+//				trace(docodaXML_content);
+				var fileSize:Number = 0;
+				for(var i:int = 0;i < fileList.length;i++){
+					var tmpFile:File = (fileList[i] as File);
+					fileSize += tmpFile.size;
+					var filePath:String = tmpFile.nativePath.replace(GLOBAL_GAME_PATH,"").slice(1,tmpFile.nativePath.length-1);
+					decodaXML_content.push("<file>\n <filename>"+filePath+"</filename>\n</file>")
+				}
+//				trace(decodaXML_content);
+				var fileText:String = decodaXML_head + decodaXML_content.join("\n")+decodaXML_footer;
+				var file:File = new File(GLOBAL_GAME_PATH+"/kofProject.deproj");
+				if(file.exists)file.deleteFile();
+				FileManager.writeTextInFile(file,fileText);
+				var msg:String = "全部lua文件："+fileList.length+"个\n"+"全部大小："+int(fileSize/1024)+"KB";
+				Alert.show(msg,"提示");
+			}
+			//[{"label":"打包模块"},{"label":"打包&同步"},{"label":"打包&同步uiconfig"},{"label":"打包&同步plist"}];
+
+			protected function buildBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				startBuild(build_type);
+			}
+			
+			protected function buildBtn_itemClickHandler(event:MenuEvent):void
+			{
+				// TODO Auto-generated method stub
+				build_type = event.index;
+				buildBtn.label = event.item.label;
+			}
+			
+			protected function sockeBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				SocketUtils.onConnect();
+			}
+			
+			protected function sendSocketData_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				SocketUtils.send();
+			}
+			
+			protected function renameBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var file:File = new File(chinaTF.text);
+				if(file.exists){
+					ChinaUtil.onRename(file);
+				}else{
+					Alert.show("文件目录不能为空","提示");
+				}
+
+			}
+			
+			
+			protected function configBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				ExcelUtils.onConfig(configFromTF.text,configToTF.text);
+			}
+			
+			protected function tempBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				CodeTempUtil.onStart(new File(tempTF.text));
+			}
+			
+			protected function cocostudioBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(cocostudioPathTF.text == ""){
+					Alert.show("请在全局设置里面设置cocostudio打开方式","提示");
+					return;
+				}
+				var ccd_exe:File = new File(cocostudioPathTF.text);
+				if(ccd_exe.exists == false){
+					return;
+				}
+				var info:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+				info.executable = ccd_exe;
+				var progress:NativeProcess = new NativeProcess();
+				
+				progress.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA,function(e:ProgressEvent):void
+				{
+					
+				});
+				progress.addEventListener(ProgressEvent.STANDARD_ERROR_DATA,function(e:ProgressEvent):void
+				{
+					trace("Got:",progress.standardOutput.readUTFBytes(progress.standardOutput.bytesAvailable));
+				});
+				progress.addEventListener(NativeProcessExitEvent.EXIT,function(event:NativeProcessExitEvent):void
+				{
+					
+				});
+				progress.addEventListener(IOErrorEvent.STANDARD_OUTPUT_IO_ERROR,function(e:IOErrorEvent):void
+				{
+					trace("Progress Standard output io error :",e.toString());
+					//Alert.show(arg + "Error2:" + progress.standardError.readUTFBytes(progress.standardError.bytesAvailable));
+				});
+				progress.addEventListener(IOErrorEvent.STANDARD_ERROR_IO_ERROR,function(e:IOErrorEvent):void
+				{
+					trace("Progress Standard error io error :",e.toString());
+					//Alert.show(arg + "Error3:" + progress.standardError.readUTFBytes(progress.standardError.bytesAvailable));
+				});
+				
+				
+				var argumentsVec:Vector.<String> = new Vector.<String>();
+				argumentsVec.push(cocostudio_path.text+"/"+moduleNameInput.text+"/"+moduleNameInput.text+".xml.ui");
+				info.arguments = argumentsVec;
+				progress.start(info);
+			}
+			
+			protected function normalEffBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				EffectUtils.build(effectPath.text,false);
+			}
+			
+			protected function hightEffBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				EffectUtils.build(effectPath.text,true);
+			}
+			
+			protected function updateBaseBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				Alert.okLabel = "确定";
+				Alert.cancelLabel = "取消";
+				Alert.show("你确定要同步此模块的base资源吗?","提示",Alert.OK|Alert.CANCEL,null,function(closeEvent:CloseEvent):void
+				{
+					if(closeEvent.detail == Alert.OK){
+						var moduleName:String = moduleNameInput.text;
+						var base:File = new File(cocostudio_path.text+"/"+moduleName+"/Resources/base");
+						var baseFolder:String = GLOBAL_GAME_PATH+"/cocoStudio/base/base";
+						var targetFile:File = new File(cocostudio_path.text+"/"+moduleName);
+						if(base.exists){
+							base.deleteDirectory(true);
+						}
+						FileManager.copyFile(baseFolder,targetFile.nativePath+"/Resources/base");
+						Alert.show("更新成功","提示");
+					}
+				}
+				)
+			}
+			
+			protected function sameResBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				DiffUtils.checkSameRes(new File(sameResTF.text));
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:TabNavigator id="mainTab" x="9" y="15" width="95%" height="506" selectedIndex="0">
+		<s:NavigatorContent width="100%" height="100%" label="模块">
+			<s:BorderContainer id="createPrjContainer" visible="true" x="0" y="16" width="100%"
+							   height="452" borderVisible="true">
+				<s:CheckBox x="14" y="198" label="生成代码模版" visible="false"/>
+				<s:TextInput id="moduleNameInput" x="89" y="12" width="220" change="moduleNameInput_changeHandler(event)"/>
+				<ns1:MyFileInput id="cocostudio_path" x="10" y="47" descText="cocostudio模块目录">
+				</ns1:MyFileInput>
+				<ns1:MyFileInput id="res_path" x="10" y="95" descText="资源模块目录">
+				</ns1:MyFileInput>
+				<ns1:MyFileInput id="script_path" x="10" y="143" descText="代码模块目录">
+				</ns1:MyFileInput>
+				<s:Label x="15" y="14" fontSize="14" text="模块名称"/>
+				<s:Button id="createBtn" y="214" width="100" height="40" label="开始创建"
+						  click="createModuhe_Handler(event)" horizontalCenter="1"/>
+				<mx:LinkButton id="backBtn" y="236" right="10" label="返回"
+							   click="backBtn_clickHandler(event)" color="#1687B1"
+							   textDecoration="underline"/>
+				<s:Button id="clearBtn" x="354" y="236" label="清理模块"
+						  click="clearBtn_clickHandler(event)" visible="false"/>
+				<mx:LinkButton id="cocostudioBtn" x="311" y="14" label="使用cocostudio打开"
+							   click="cocostudioBtn_clickHandler(event)" color="#1687B1"
+							   enabled="false" textDecoration="underline"/>
+				<mx:PopUpMenuButton id="buildBtn" y="372" width="150" height="40" label="打包模块"
+									click="buildBtn_clickHandler(event)" horizontalCenter="-17"
+									itemClick="buildBtn_itemClickHandler(event)"/>
+				<s:Label right="10." text="v1.8" verticalCenter="210"/>
+				<mx:LinkButton id="updateBaseBtn" x="427" y="14" label="更新base"
+							   click="updateBaseBtn_clickHandler(event)" color="#1687B1"
+							   enabled="false" textDecoration="underline"/>
+				<s:CheckBox id="hightQuiltyCb" x="430" y="387" label="启用高质量打包" selected="true"/>
+			</s:BorderContainer>
+			<s:VGroup width="82" height="67" gap="0" horizontalCenter="4" verticalAlign="middle"
+					  verticalCenter="-8">
+				<mx:LinkButton id="createPrjBtn" label="创建模块"
+							   click="createPrjBtn_clickHandler(event)" color="#1687B1"
+							   fontStyle="normal" fontWeight="normal" textDecoration="underline"/>
+				<mx:LinkButton id="openPrjBtn" label="打开模块" click="openPrjBtn_clickHandler(event)"
+							   color="#1687B1" textDecoration="underline"/>
+			</s:VGroup>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%" height="100%" label="plist打包">
+			<s:layout>
+				<s:BasicLayout/>
+			</s:layout>
+			<ns1:MyFileInput id="orginResPathTF" x="23" y="48" descText="需要打包的文件目录">
+			</ns1:MyFileInput>
+			<ns1:MyFileInput id="saveResPathTF" x="23" y="108" descText="打包完成存放目录">
+			</ns1:MyFileInput>
+			<s:Button id="normalPackBtn" y="168" width="100" height="40" label="标准质量打包"
+					  click="normalPackBtn_clickHandler(event)" horizontalCenter="-67"/>
+			<s:Button id="hightPackBtn" y="167" width="100" height="40" label="高质量打包"
+					  click="hightPackBtn_clickHandler(event)" horizontalCenter="58"/>
+			<mx:HRule x="44" y="216" width="628" height="5"/>
+			<ns1:MyFileInput id="effectPath" x="22" y="258" width="681">
+			</ns1:MyFileInput>
+			<s:Button id="normalEffBtn" x="241" y="307" width="100" height="40" label="普通质量特效"
+					  click="normalEffBtn_clickHandler(event)"/>
+			<s:Button id="hightEffBtn" x="366" y="307" width="100" height="40" label="高质量特效"
+					  click="hightEffBtn_clickHandler(event)"/>
+			<s:Label x="322" y="234" fontSize="14" text="特效序列打包"/>
+			<s:Label x="318" y="18" fontSize="14" text="base资源打包"/>
+			<s:TextArea id="logTF" x="22" y="359" width="668" height="97" prompt="打包日志"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%" height="100%" label="excel打包">
+			<ns1:MyFileInput id="configFromTF" x="26" y="32" descText="excel目录">
+			</ns1:MyFileInput>
+			<ns1:MyFileInput id="configToTF" x="26" y="92" descText="文件生成目录">
+			</ns1:MyFileInput>
+			<s:Button id="configBtn" x="296" y="175" width="100" height="40" label="打包配置"
+					  click="configBtn_clickHandler(event)"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%" height="100%" label="全局设置">
+			<ns1:MyFileInput id="packPathTF" x="10" y="58" descText="texturepack路径设置" openType= "1">
+			</ns1:MyFileInput>
+			<ns1:MyFileInput id="cocostudioPathTF" x="10" y="110" descText="cocostudio(exe)路径设置" openType= "1">
+			</ns1:MyFileInput>
+			<ns1:MyFileInput id="gamePathTF" x="10" y="10" descText="项目路径设置">
+			</ns1:MyFileInput>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%" height="100%" label="辅助工具">
+			<s:Button id="decodaBtn" x="476" y="392" width="100" height="40" label="生成decoda文件列表"
+					  click="decodaBtn_clickHandler(event)" visible="false"/>
+			<s:Button id="sockeBtn" x="252" y="393" width="100" height="40" label="socket测试"
+					  click="sockeBtn_clickHandler(event)" visible="true"/>
+			<mx:HRule x="35" y="121" width="654"/>
+			<s:Button id="sendSocketData" x="368" y="392" width="100" height="40" label="发送数据"
+					  click="sendSocketData_clickHandler(event)" visible="true"/>
+			<s:Button id="renameBtn" x="564" y="57" width="100" height="40" label="执行"
+					  click="renameBtn_clickHandler(event)"/>
+			<s:Button id="tempBtn" x="564" y="174" width="100" height="40" label="执行"
+					  click="tempBtn_clickHandler(event)"/>
+			<mx:HRule x="36" y="238" width="654"/>
+			<s:Button id="sameResBtn" x="565" y="291" width="100" height="40" label="执行"
+					  click="sameResBtn_clickHandler(event)"/>
+			<ns1:MyFileInput id="sameResTF" x="37" y="291" width="519" descText="文件夹">
+			</ns1:MyFileInput>
+			<s:Label x="36" y="248" fontSize="14" text="查找重复资源"/>
+			<ns1:MyFileInput id="chinaTF" x="35" y="57" width="519" descText="文件夹目录">
+			</ns1:MyFileInput>
+			<ns1:MyFileInput id="tempTF" x="36" y="174" width="519" descText="uiconfig文件" openType="-1">
+			</ns1:MyFileInput>
+			<s:Label x="35" y="35" fontSize="14" text="批量替换文件名为中文"/>
+			<s:Label x="35" y="131" fontSize="14" text="生成代码模版"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%" height="100%" label="资源热更新">
+			<ns1:MyFileInput id="v1TF" x="24" y="49" width="661" descText="文件夹目录">
+			</ns1:MyFileInput>
+			<ns1:MyFileInput id="v2TF" x="24" y="114" width="661" descText="文件夹目录">
+			</ns1:MyFileInput>
+			<s:Label x="27" y="20" fontSize="14" text="生成热更配置文件"/>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+</s:WindowedApplication>

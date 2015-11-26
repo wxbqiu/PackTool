@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<UIProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ProjectDir>E:\mobile\kofGame\cocoStudio\module\{tempModule}</ProjectDir>
+  <Version>1.5.0.1</Version>
+  <Resources>E:\mobile\kofGame\cocoStudio\module\{tempModule}\Resources</Resources>
+  <Name>{tempModule}</Name>
+  <JsonFileName>{tempModule}.json</JsonFileName>
+  <JsonFolder>E:\mobile\kofGame\cocoStudio\module\{tempModule}\Json</JsonFolder>
+  <JsonList>
+    <string>{tempModule}.json</string>
+  </JsonList>
+  <CanvasSize>
+    <Width>0</Width>
+    <Height>0</Height>
+  </CanvasSize>
+  <filePath>E:\mobile\kofGame\cocoStudio\module\{tempModule}\{tempModule}.xml.ui</filePath>
+  <ProjectType>UIProject</ProjectType>
+  <ResRelativePath />
+  <imageFileList />
+  <imagePngList />
+  <JsonSuffix>.json</JsonSuffix>
+  <CurrentUIJson>TempleteModule_1.json</CurrentUIJson>
+</UIProject>

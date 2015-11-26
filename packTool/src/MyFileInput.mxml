@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+				 xmlns:s="library://ns.adobe.com/flex/spark"
+				 xmlns:mx="library://ns.adobe.com/flex/mx"
+				 xmlns:ns1="*"
+				 width="95%" height="40" creationComplete="group1_creationCompleteHandler(event)">
+	<s:layout>
+		<s:HorizontalLayout paddingLeft="10" verticalAlign="middle"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.frontdig.utils.Cookie;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.TextOperationEvent;
+			public var file:File = new File();
+			public var cookie:Cookie;
+			public var flag:String = "text";
+			private var _descText:String;
+			public static const OPEN_DIC:int = 0;
+			public static const OPEN_FILE:int = 1;
+			
+			public var onTextChange:Function = null;
+			public function get descText():String
+			{
+				return _descText;
+			}
+
+			public function set descText(value:String):void
+			{
+				_descText = value;
+				descTF.text = value;
+			}
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				cookie = new Cookie(this.id,365);
+				dicTF.text = cookie.get(flag);
+				dicTF.addEventListener(TextOperationEvent.CHANGE,onChange);
+				file.addEventListener(Event.SELECT,function():void{
+					dicTF.text = file.nativePath;
+					cookie.put(flag,dicTF.text);
+					if(onTextChange!=null)onTextChange();
+				});
+				
+			}
+			public function get text():String
+			{
+				return dicTF.text;
+			}
+			public function set text(value:String):void{
+				dicTF.text = value;
+			}
+			public var openType:int = 0;
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(text!=""){
+					file.nativePath = text;
+				}
+				if(openType==OPEN_DIC){
+					file.browseForDirectory("打开主要目录");
+				}else{
+					file.browseForOpen("选择一个缺省目录");
+				}
+			}
+			
+			protected function onChange(event:TextOperationEvent):void
+			{
+				// TODO Auto-generated method stub
+				cookie.put(flag,dicTF.text);
+				if(onTextChange!=null)onTextChange();
+			}
+			
+			override public function set enabled(value:Boolean):void
+			{
+				if(dicTF)dicTF.enabled = value;
+				if(brownBtn)brownBtn.enabled = value;
+			}
+			
+			protected function openPath_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(text=="")return;
+				var file:File = new File(text);
+				if(!file.exists)return;
+				if(file.isDirectory){
+					file.openWithDefaultApplication();
+				}else{
+					file.parent.openWithDefaultApplication();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Label id="descTF" fontSize="14" fontWeight="normal" text="描述" textAlign="left"
+			 verticalAlign="middle"/>
+	<s:TextInput width="80%" id="dicTF"/>
+	<s:Button width="65" label="浏览" id="brownBtn" click="button1_clickHandler(event)"/>
+	<s:Button label="打开目录" id="openPath" click="openPath_clickHandler(event)"/>
+</s:Group>
