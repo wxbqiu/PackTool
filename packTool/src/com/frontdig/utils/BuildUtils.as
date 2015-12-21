@@ -374,8 +374,10 @@ package com.frontdig.utils
 			var ls:XMLList = xml.children();
 			var atts:XMLList = xml.attributes();
 			
+			var attNum:int = 0;
 			for each (var att:XML  in atts)
 			{
+				attNum++;
 				str += att.name().toString() + "=\"" + att.toString() + "\",";
 			}
 			
@@ -383,14 +385,20 @@ package com.frontdig.utils
 			{
 				for each(var node:XML in ls) 
 				{
-					str += node.name().toString() + "=";
+//					str += node.name().toString() + "=";
+//					var strSub:String = parseXML(node);
+//					str += strSub + ",";
 					var strSub:String = parseXML(node);
-					str += strSub + ",";
+					if(strSub != "{}") {
+						str += node.name().toString() + "=" + strSub + ",";
+					}
 				}
 				str = str.substring(0, str.length-1)
 				
 			} else {
-				str = str.substring(0, str.length-1)
+				if (attNum != 0) {
+					str = str.substring(0, str.length-1)
+				}
 			}
 			str += "}";
 			return str;
