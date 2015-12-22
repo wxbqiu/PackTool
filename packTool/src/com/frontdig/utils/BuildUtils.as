@@ -390,7 +390,10 @@ package com.frontdig.utils
 //					str += strSub + ",";
 					var strSub:String = parseXML(node);
 					if(strSub != "{}") {
-						str += node.name().toString() + "=" + strSub + ",";
+						if(node.name().toString() != "AbstractNodeData")
+							str += node.name().toString() + "=" + strSub + ",";
+						else
+							str += strSub + ",";
 					}
 				}
 				str = str.substring(0, str.length-1)
