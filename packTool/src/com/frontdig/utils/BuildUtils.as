@@ -378,7 +378,7 @@ package com.frontdig.utils
 			for each (var att:XML  in atts)
 			{
 				attNum++;
-				str += att.name().toString() + "=\"" + att.toString() + "\",";
+				str += att.name().toString() + "=[[" + att.toString() + "]],";
 			}
 			
 			if(ls.length() > 0)
