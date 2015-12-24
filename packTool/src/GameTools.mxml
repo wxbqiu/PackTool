@@ -143,30 +143,30 @@
 					GLOBAL_PACK_PATH = packPathTF.text;
 					if(gamePathTF.text != "") {
 						try {
-							var file:File = new File(gamePathTF.text);
-							var array:Array = file.getDirectoryListing();
-							var ccsExist:Boolean = false;
-							for each(var f:File in array) {
-								if(!f.isDirectory) {
-									trace(f.name)
-									var fileName:String = f.name;
-									if(fileName.indexOf(".")!=0) {
-										var index:int = fileName.lastIndexOf(".")
-										var suffix:String = fileName.substring(index);
-										if(suffix == ".ccs") {
-											COCOSSTUDIO_PROJ_PATH = f.nativePath;
-											ccsExist = true;
-											break;
-										}
-									}
-								}
-							}
-							if(ccsExist) {
-								GLOBAL_GAME_PATH = gamePathTF.text;
-							} else {
-								gamePathTF.text = ""
-								Alert.show("请在全局路径设置工程路径", "找不到CocosStudio工程")
-							}
+//							var file:File = new File(gamePathTF.text);
+//							var array:Array = file.getDirectoryListing();
+//							var ccsExist:Boolean = false;
+//							for each(var f:File in array) {
+//								if(!f.isDirectory) {
+//									trace(f.name)
+//									var fileName:String = f.name;
+//									if(fileName.indexOf(".")!=0) {
+//										var index:int = fileName.lastIndexOf(".")
+//										var suffix:String = fileName.substring(index);
+//										if(suffix == ".ccs") {
+//											COCOSSTUDIO_PROJ_PATH = f.nativePath;
+//											ccsExist = true;
+//											break;
+//										}
+//									}
+//								}
+//							}
+//							if(ccsExist) {
+//								GLOBAL_GAME_PATH = gamePathTF.text;
+//							} else {
+//								gamePathTF.text = ""
+//								Alert.show("请在全局路径设置工程路径", "找不到CocosStudio工程")
+//							}
 						}catch(err:	ArgumentError){
 							gamePathTF.text = ""
 							Alert.show("请在全局路径设置工程路径", "找不到CocosStudio工程")
