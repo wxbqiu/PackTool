@@ -486,16 +486,17 @@
 						if(file.exists){
 							//							trace("打包完成");
 							FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".pvr.ccz",true);
-							FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
-							
-//							if(checkNotPlistFile()==false){
-//								if(checkPlistExists() == true){
-////									if (fileNames.length <= 1){
-////										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
-////										Alert.show("打包并同步资源成功","提示");
-////										clearInterval(intervarId);
-////										return;
-////									}
+							if(checkNotPlistFile()==false){
+								if(checkPlistExists() == true){
+//									if (fileNames.length <= 1){
+//										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
+//										Alert.show("打包并同步资源成功","提示");
+//										clearInterval(intervarId);
+//										return;
+//									}
+									FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
+									Alert.show("打包并同步资源成功","提示");
+									clearInterval(intervarId);
 //									for(var k:int = 0;k < fileNames.length;k++){
 //										var plistPath:String = cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist";
 //										var plistFile:File = new File(plistPath);
@@ -511,11 +512,11 @@
 //										Alert.show("打包并同步资源成功","提示");
 //										clearInterval(intervarId);
 //									}
-//								}else{
-//									return;
-//								}
-//							}
-//							Alert.show("打包并同步资源成功","提示");
+								}else{
+									return;
+								}
+							}
+							Alert.show("打包并同步资源成功","提示");
 							clearInterval(intervarId);
 							
 						}
