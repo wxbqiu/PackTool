@@ -486,33 +486,35 @@
 						if(file.exists){
 							//							trace("打包完成");
 							FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".pvr.ccz",true);
-							if(checkNotPlistFile()==false){
-								if(checkPlistExists() == true){
-//									if (fileNames.length <= 1){
-//										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
+							FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
+							
+//							if(checkNotPlistFile()==false){
+//								if(checkPlistExists() == true){
+////									if (fileNames.length <= 1){
+////										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
+////										Alert.show("打包并同步资源成功","提示");
+////										clearInterval(intervarId);
+////										return;
+////									}
+//									for(var k:int = 0;k < fileNames.length;k++){
+//										var plistPath:String = cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist";
+//										var plistFile:File = new File(plistPath);
+//										var plistContent:String = FileManager.getFileString(plistFile);
+//										var orginContent:String = plistContent+"";
+//										var flag:String = fileNames[k].name.replace("Config.lua","");
+////										var reg:RegExp = new RegExp("<key>"+moduleName,"gi");
+////										plistContent = plistContent.replace(reg,"<key>"+moduleName+"/"+flag);
+////										trace(plistContent);
+////										FileManager.writeTextInFile(plistFile,plistContent);
+//										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+"_"+flag+".plist",true);
+////										FileManager.writeTextInFile(plistFile,orginContent);
 //										Alert.show("打包并同步资源成功","提示");
 //										clearInterval(intervarId);
-//										return;
 //									}
-									for(var k:int = 0;k < fileNames.length;k++){
-										var plistPath:String = cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist";
-										var plistFile:File = new File(plistPath);
-										var plistContent:String = FileManager.getFileString(plistFile);
-										var orginContent:String = plistContent+"";
-										var flag:String = fileNames[k].name.replace("Config.lua","");
-//										var reg:RegExp = new RegExp("<key>"+moduleName,"gi");
-//										plistContent = plistContent.replace(reg,"<key>"+moduleName+"/"+flag);
-//										trace(plistContent);
-//										FileManager.writeTextInFile(plistFile,plistContent);
-										FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+"_"+flag+".plist",true);
-//										FileManager.writeTextInFile(plistFile,orginContent);
-										Alert.show("打包并同步资源成功","提示");
-										clearInterval(intervarId);
-									}
-								}else{
-									return;
-								}
-							}
+//								}else{
+//									return;
+//								}
+//							}
 //							Alert.show("打包并同步资源成功","提示");
 							clearInterval(intervarId);
 							
