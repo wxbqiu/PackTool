@@ -448,7 +448,7 @@
 //							FileManager.writeTextInFile(f,luaContent);
 //						}
 						
-						FileManager.copyFile(f.nativePath,res_path.text+"//"+moduleName+"//uiResource//"+moduleName + "_" +f.name,true);
+						FileManager.copyFile(f.nativePath,res_path.text+"//"+moduleName+"//"+moduleName + "_" +f.name,true);
 					}
 					Alert.show("打包并同步uiconfig成功","提示");
 				}
@@ -485,7 +485,7 @@
 						var file:File = new File(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz");
 						if(file.exists){
 							//							trace("打包完成");
-							FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".pvr.ccz",true);
+							FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".pvr.ccz",res_path.text+"//"+moduleName+"//"+moduleName+".pvr.ccz",true);
 							if(checkNotPlistFile()==false){
 								if(checkPlistExists() == true){
 //									if (fileNames.length <= 1){
@@ -494,7 +494,7 @@
 //										clearInterval(intervarId);
 //										return;
 //									}
-									FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//uiResource//"+moduleName+".plist",true);
+									FileManager.copyFile(cocostudio_path.text+"/"+moduleName+"/Result/"+moduleName+".plist",res_path.text+"//"+moduleName+"//"+moduleName+".plist",true);
 									Alert.show("打包并同步资源成功","提示");
 									clearInterval(intervarId);
 //									for(var k:int = 0;k < fileNames.length;k++){
