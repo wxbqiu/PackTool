@@ -50,7 +50,7 @@
 				moduleNameInput.text= "";
 				script_path.text = GLOBAL_GAME_PATH+"/src/module/view";
 				res_path.text = GLOBAL_GAME_PATH+"/res/module";
-				cocostudio_path.text = GLOBAL_GAME_PATH+"/cocosstudio";
+				cocostudio_path.text = GLOBAL_GAME_PATH+"/uiEditor/cocosstudio";
 //				if(moduleNameInput.text!=""){
 //					moduleNameInput_changeHandler(null);
 //				}
@@ -98,7 +98,7 @@
 				var moduleName:String = openFileDir.substring(openFileDir.lastIndexOf(File.separator) + 1);
 				moduleNameInput.text = moduleName;
 				
-				cocostudio_path.text = GLOBAL_GAME_PATH+ File.separator + "cocosstudio";
+				cocostudio_path.text = GLOBAL_GAME_PATH+ File.separator + "uiEditor/cocosstudio";
 				script_path.text = GLOBAL_GAME_PATH+ File.separator + "src" + File.separator + "module"+ File.separator + "view";
 				res_path.text = GLOBAL_GAME_PATH+File.separator+"res"+File.separator+"module";
 
@@ -142,27 +142,32 @@
 					GLOBAL_GAME_PATH = gamePathTF.text;
 					GLOBAL_PACK_PATH = packPathTF.text;
 					if(gamePathTF.text != "") {
-						var file:File = new File(gamePathTF.text);
-						var array:Array = file.getDirectoryListing();
-						var ccsExist:Boolean = false;
-						for each(var f:File in array) {
-							if(!f.isDirectory) {
-								trace(f.name)
-								var fileName:String = f.name;
-								if(fileName.indexOf(".")!=0) {
-									var index:int = fileName.lastIndexOf(".")
-									var suffix:String = fileName.substring(index);
-									if(suffix == ".ccs") {
-										COCOSSTUDIO_PROJ_PATH = f.nativePath;
-										ccsExist = true;
-										break;
+						try {
+							var file:File = new File(gamePathTF.text);
+							var array:Array = file.getDirectoryListing();
+							var ccsExist:Boolean = false;
+							for each(var f:File in array) {
+								if(!f.isDirectory) {
+									trace(f.name)
+									var fileName:String = f.name;
+									if(fileName.indexOf(".")!=0) {
+										var index:int = fileName.lastIndexOf(".")
+										var suffix:String = fileName.substring(index);
+										if(suffix == ".ccs") {
+											COCOSSTUDIO_PROJ_PATH = f.nativePath;
+											ccsExist = true;
+											break;
+										}
 									}
 								}
 							}
-						}
-						if(ccsExist) {
-							GLOBAL_GAME_PATH = gamePathTF.text;
-						} else {
+							if(ccsExist) {
+								GLOBAL_GAME_PATH = gamePathTF.text;
+							} else {
+								gamePathTF.text = ""
+								Alert.show("请在全局路径设置工程路径", "找不到CocosStudio工程")
+							}
+						}catch(err:	ArgumentError){
 							gamePathTF.text = ""
 							Alert.show("请在全局路径设置工程路径", "找不到CocosStudio工程")
 						}
@@ -185,30 +190,7 @@
 					
 					
 					gamePathTF.onTextChange = function():void{
-						var file:File = new File(gamePathTF.text);
-						var array:Array = file.getDirectoryListing();
-						var ccsExist:Boolean = false;
-						for each(var f:File in array) {
-							if(!f.isDirectory) {
-								trace(f.name)
-								var fileName:String = f.name;
-								if(fileName.indexOf(".")!=0) {
-									var index:int = fileName.lastIndexOf(".")
-									var suffix:String = fileName.substring(index);
-									if(suffix == ".ccs") {
-										COCOSSTUDIO_PROJ_PATH = f.nativePath;
-										ccsExist = true;
-										break;
-									}
-								}
-							}
-						}
-						if(ccsExist) {
-							GLOBAL_GAME_PATH = gamePathTF.text;
-						} else {
-							gamePathTF.text = ""
-							Alert.show("你在逗我吗？目录下面没有CocosStudio的工程", "找不到CocosStudio工程")
-						}
+						GLOBAL_GAME_PATH = gamePathTF.text;
 					}
 					
 					packPathTF.onTextChange = function():void{
@@ -303,6 +285,7 @@
 						return false;
 					}
 				
+					
 					//创建模块文件夹
 					var targetFile:File = new File(cocostudio_path.text+"/"+moduleName);
 					targetFile.createDirectory();

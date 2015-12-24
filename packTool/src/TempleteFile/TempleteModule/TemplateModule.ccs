@@ -1,0 +1,13 @@
+<Solution>
+  <PropertyGroup Name="TemplateModule" Version="2.3.3.0" Type="CocosStudio" />
+  <SolutionFolder>
+    <Group ctype="ResourceGroup">
+      <RootFolder Name=".">
+        <Folder Name="{tempModule}">
+          <Project Name="{tempModule}.csd" Type="Layer" />
+          <Folder Name="image" />
+        </Folder>
+      </RootFolder>
+    </Group>
+  </SolutionFolder>
+</Solution>
